@@ -4,60 +4,54 @@ using TMPro;
 
 public class PlaneController : MonoBehaviour
 {
-    public float forwardSpeed = 12f; // Скорость движения вперед
-    public float pitchSpeed = 2f; // Скорость изменения тангажа
-    public float fallSpeed = 1f; // Скорость падения
-    public float maxPitchAngle = 45f; // Максимальный угол тангажа
-    public float fuel = 10f; // Запас топлива
-    public float fuelConsumptionRate = 1f; // Расход топлива при подъеме
+    public float forwardSpeed = 12f;
+    public float pitchSpeed = 2f;
+    public float fallSpeed = 1f;
+    public float maxPitchAngle = 45f;
+    public float fuel = 10f;
+    public float fuelConsumptionRate = 1f;
     public TMP_Text fuelText;
     public TMP_Text scoreText;
-    public GameObject gameOverPanel; // Панель "Game Over"
-    public TMP_Text gameOverScoreText; // Текст для отображения счета в панели "Game Over"
-    public TMP_Text gameOverReasonText; // Текст для отображения причины поражения
-    public GameObject ground; // Объект земли
-    public GameObject background; // Объект фона
-    public GameObject starPrefab; // Префаб звезды
-    public GameObject fuelPrefab; // Префаб топлива
-    public int numberOfStars = 3; // Количество звезд для создания
-    public int numberOfFuel = 3; // Количество топлива для создания
+    public GameObject gameOverPanel;
+    public TMP_Text gameOverScoreText;
+    public TMP_Text gameOverReasonText;
+    public GameObject ground;
+    public GameObject background;
+    public GameObject starPrefab;
+    public GameObject fuelPrefab;
+    public int numberOfStars = 3;
+    public int numberOfFuel = 3;
 
-    public Vector3 cameraOffset = new Vector3(20, 4, 7); // Смещение камеры
+    public Vector3 cameraOffset = new Vector3(20, 4, 7);
 
     private int score = 0;
-    private float targetPitchAngle = 0f; // Целевой угол тангажа
-    private float timeAlive = 0f; // Время, которое игрок продержался
-    private string gameOverReason; // Причина поражения
-    private bool gameIsOver = false; // Флаг, обозначающий окончание игры
+    private float targetPitchAngle = 0f;
+    private float timeAlive = 0f;
+    private string gameOverReason;
+    private bool gameIsOver = false;
 
     private void Start()
     {
         LoadScore();
-        transform.position = new Vector3(0, 0, -30); // Позиция самолета при старте
+        transform.position = new Vector3(0, 0, -30);
         transform.rotation = Quaternion.Euler(targetPitchAngle, 0, 0);
         Camera.main.transform.position = transform.position + cameraOffset;
         Camera.main.transform.rotation = Quaternion.Euler(10, -90, 0);
-        Time.timeScale = 1; // Убедиться, что время идет
+        Time.timeScale = 1;
 
-        gameOverPanel.SetActive(false); // Отключить панель "Game Over" в начале
+        gameOverPanel.SetActive(false);
 
-        SpawnRandomObjects(starPrefab, numberOfStars); // Создание звезд
-        SpawnRandomObjects(fuelPrefab, numberOfFuel); // Создание топлива
+        SpawnRandomObjects(starPrefab, numberOfStars);
+        SpawnRandomObjects(fuelPrefab, numberOfFuel);
     }
-
-
 
     private void Update()
     {
-        if (gameIsOver) return; // Не выполнять код, если игра окончена
+        if (gameIsOver) return;
 
-        // Увеличение времени выживания
         timeAlive += Time.deltaTime;
-
-        // Движение вперед
         transform.Translate(Vector3.forward * forwardSpeed * Time.deltaTime);
 
-        // Падение самолета под углом 45 градусов, если не нажата клавиша
         if (fuel <= 0 || (!Input.GetKey(KeyCode.Space) && !Input.GetMouseButton(0)))
         {
             targetPitchAngle = 45f;
@@ -68,7 +62,6 @@ public class PlaneController : MonoBehaviour
             fuel -= fuelConsumptionRate * Time.deltaTime;
         }
 
-        // Плавное изменение угла тангажа
         float currentPitchAngle = transform.rotation.eulerAngles.x;
         currentPitchAngle = Mathf.LerpAngle(currentPitchAngle, targetPitchAngle, pitchSpeed * Time.deltaTime);
         transform.rotation = Quaternion.Euler(currentPitchAngle, 0, 0);
@@ -77,8 +70,7 @@ public class PlaneController : MonoBehaviour
         position.x = 0;
         transform.position = position;
 
-        // Проверка на столкновение с землей
-        if (transform.position.y <=-20)
+        if (transform.position.y <= -20)
         {
             Debug.Log("Ground");
             GameOver();
@@ -104,14 +96,12 @@ public class PlaneController : MonoBehaviour
     {
         Camera.main.transform.position = transform.position + cameraOffset;
         Camera.main.transform.LookAt(transform.position);
-
-        // Движение фона вместе с самолетом
         background.transform.position = new Vector3(transform.position.x, background.transform.position.y, transform.position.z);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (gameIsOver) return; // Не выполнять код, если игра окончена
+        if (gameIsOver) return;
 
         if (other.CompareTag("NordStar"))
         {
@@ -123,11 +113,6 @@ public class PlaneController : MonoBehaviour
             score += 10;
             Destroy(other.gameObject);
         }
-        /*else if (other.CompareTag("Rock"))
-        {
-            gameOverReason = "Collided with an obstacle";
-            GameOver();
-        }*/
     }
 
     private void GameOver()
@@ -137,8 +122,7 @@ public class PlaneController : MonoBehaviour
         SaveScore();
         gameOverPanel.SetActive(true);
         gameOverScoreText.text = score > PlayerPrefs.GetInt("HighScore", 0) ? "New High Score: " + Mathf.FloorToInt(timeAlive).ToString() + " seconds" : "Time Survived: " + Mathf.FloorToInt(timeAlive).ToString() + " seconds";
-        //gameOverReasonText.text = "Reason: " + gameOverReason;
-        Time.timeScale = 0; // Остановить время
+        Time.timeScale = 0;
     }
 
     private void SaveScore()
@@ -168,23 +152,21 @@ public class PlaneController : MonoBehaviour
         }
         if (scoreText != null)
         {
-            scoreText.text = "Score: " + Mathf.FloorToInt(timeAlive).ToString(); // Отображение времени выживания в секундах
+            scoreText.text = "Score: " + Mathf.FloorToInt(timeAlive).ToString();
         }
     }
 
     public void RestartGame()
     {
-        Time.timeScale = 1; // Возобновить время
+        Time.timeScale = 1;
         gameIsOver = false;
-        // Перезагрузить сцену или сбросить все параметры к начальному состоянию
         UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
 
     public void ExitToMenu()
     {
-        Time.timeScale = 1; // Возобновить время
+        Time.timeScale = 1;
         gameIsOver = false;
-        // Перейти в главное меню (загрузить сцену главного меню)
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
     private void SpawnRandomObjects(GameObject prefab, int count)
@@ -196,7 +178,7 @@ public class PlaneController : MonoBehaviour
             Vector3 randomPosition = new Vector3(0, randomY, randomZ);
             Instantiate(prefab, randomPosition, Quaternion.identity);
         }
+    }
 }
 
-}
 
