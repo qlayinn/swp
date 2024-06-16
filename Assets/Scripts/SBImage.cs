@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class SetBackgroundImage : MonoBehaviour
 {
-    public Sprite backgroundImage; // Перетащите ваше изображение сюда через инспектор
+    public Sprite backgroundImage;
 
     void Start()
     {
